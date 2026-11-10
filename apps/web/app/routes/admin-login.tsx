@@ -6,6 +6,7 @@ import { SITE } from "@aihot/site";
 import { safeReturn, SIGN_IN_HOME } from "@aihot/contracts/admin";
 import { apiGet } from "../lib/api.server";
 import { adminSignedIn } from "../lib/admin.server";
+import { siteHref } from "../lib/site-path";
 import { Wordmark } from "@aihot/site/brand/Logo.tsx";
 import { buttonClass } from "../components/ui/Controls";
 
@@ -38,7 +39,7 @@ export default function AdminLogin() {
           <Wordmark size={28} className="text-ink" />
           <span className="text-[15px] font-semibold text-ink-3">后台</span>
         </div>
-        <form method="post" action="/api/auth/password" className="card mt-8 p-6">
+        <form method="post" action={siteHref("/api/auth/password")} className="card mt-8 p-6">
           <input type="hidden" name="return" value={returnTo} />
           <label htmlFor="password" className="block text-[13px] font-medium text-ink-2">
             管理员密码
@@ -61,13 +62,13 @@ export default function AdminLogin() {
             登录
           </button>
           {feishu && (
-            <a href={`/api/auth/feishu?${new URLSearchParams({ return: returnTo })}`} className={`${buttonClass("secondary", "lg")} mt-3 w-full`}>
+            <a href={siteHref(`/api/auth/feishu?${new URLSearchParams({ return: returnTo })}`)} className={`${buttonClass("secondary", "lg")} mt-3 w-full`}>
               用飞书登录
             </a>
           )}
         </form>
         <p className="mt-6 text-center text-[12px] text-ink-4">
-          <a href="/" className="hover:text-ink-2">
+          <a href={siteHref("/")} className="hover:text-ink-2">
             回到 {SITE.name}
           </a>
         </p>

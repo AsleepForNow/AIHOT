@@ -1,3 +1,4 @@
+import { siteHref } from "../lib/site-path";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Await, isRouteErrorResponse, Link, useAsyncError, useLoaderData, useNavigate, useRevalidator, type ClientLoaderFunctionArgs } from "react-router";
 import type { Route } from "./+types/item";
@@ -338,7 +339,7 @@ function ItemView({ item, followups }: Loaded) {
   };
   const copyMarkdown = async () => {
     try {
-      const res = await fetch(`/items/${item.id}/markdown`);
+      const res = await fetch(siteHref(`/items/${item.id}/markdown`));
       if (!res.ok) throw new Error(String(res.status));
       await copyText(await res.text());
       setToast("Markdown 已复制");
@@ -386,7 +387,7 @@ function ItemView({ item, followups }: Loaded) {
             (inWeChat() ? (
               <MenuItem icon={<IconDownload size={15} />} onSelect={() => { close(); void copyMarkdown(); }}>复制 Markdown</MenuItem>
             ) : (
-              <MenuItem icon={<IconDownload size={15} />} href={`/items/${item.id}/markdown`} download onSelect={close}>
+              <MenuItem icon={<IconDownload size={15} />} href={siteHref(`/items/${item.id}/markdown`)} download onSelect={close}>
                 导出 Markdown
               </MenuItem>
             ))}
@@ -401,7 +402,7 @@ function ItemView({ item, followups }: Loaded) {
     ...(item.markdownAvailable
       ? [inWeChat()
         ? { key: "markdown", label: "复制 Markdown", icon: <IconDownload size={20} />, onSelect: () => void copyMarkdown() }
-        : { key: "markdown", label: "导出 Markdown", icon: <IconDownload size={20} />, href: `/items/${item.id}/markdown`, download: true }]
+        : { key: "markdown", label: "导出 Markdown", icon: <IconDownload size={20} />, href: siteHref(`/items/${item.id}/markdown`), download: true }]
       : []),
   ];
   const originalLink = (className: string) => (

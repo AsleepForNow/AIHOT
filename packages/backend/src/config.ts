@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parseEnv } from "node:util";
 import { DEPLOYMENT, SITE } from "@aihot/site";
+import { siteBasePath } from "@aihot/contracts/site-path";
 
 export const REPO_ROOT = path.resolve(import.meta.dirname, "../../..");
 
@@ -35,12 +36,14 @@ export const isProduction = env.NODE_ENV === "production";
 
 /** AIHOT_CREDENTIALS_DIR, else the site's own default (relative to the repository). */
 const credentialsDir = env.AIHOT_CREDENTIALS_DIR || DEPLOYMENT.credentialsDir;
+const siteUrl = str("SITE_URL", SITE.defaultUrl).replace(/\/+$/, "");
 
 export const config = {
   databaseUrl: str("DATABASE_URL", "postgres://127.0.0.1:5432/aihot"),
   apiPort: int("API_PORT", 3001),
   // Every generated absolute link uses this address, whatever Host a request arrives with.
-  siteUrl: str("SITE_URL", SITE.defaultUrl).replace(/\/+$/, ""),
+  siteUrl,
+  siteBasePath: siteBasePath(siteUrl),
   egressProxyUrl: env.EGRESS_PROXY_URL || null,
   allowPrivateNetworkFetch: bool("ALLOW_PRIVATE_NETWORK_FETCH", false),
   /** Whole host names of self-hosted feed services on private addresses; only listing fetches use them. */

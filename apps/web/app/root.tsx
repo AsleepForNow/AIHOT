@@ -19,14 +19,15 @@ import { rememberPage, APPEARANCE_BOOT_SCRIPT, useAppearanceSync } from "./lib/l
 import { apiGet } from "./lib/api.server";
 import { useHydratedFlag } from "./lib/hydration";
 import { titled } from "./lib/seo";
+import { siteHref } from "./lib/site-path";
 import { webModules } from "./site-modules";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "icon", href: "/favicon.ico", sizes: "any" },
-  { rel: "icon", type: "image/png", href: "/icon.png" },
-  { rel: "apple-touch-icon", href: "/apple-icon.png" },
-  { rel: "manifest", href: "/manifest.webmanifest" },
-  { rel: "alternate", type: "application/rss+xml", title: `${SITE.name} — 精选`, href: "/feed.xml" },
+  { rel: "icon", href: siteHref("/favicon.ico"), sizes: "any" },
+  { rel: "icon", type: "image/png", href: siteHref("/icon.png") },
+  { rel: "apple-touch-icon", href: siteHref("/apple-icon.png") },
+  { rel: "manifest", href: siteHref("/manifest.webmanifest") },
+  { rel: "alternate", type: "application/rss+xml", title: `${SITE.name} — 精选`, href: siteHref("/feed.xml") },
 ];
 
 /** The release rendering this document: once a newer one is deployed, a render error reloads the page (entry.client). */

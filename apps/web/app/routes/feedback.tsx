@@ -1,3 +1,4 @@
+import { siteHref } from "../lib/site-path";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { SITE } from "@aihot/site";
@@ -126,7 +127,7 @@ export default function FeedbackPage() {
     // The page the reader was on before coming here (tracked across in-site navigation, "更多" skipped);
     // a document the browser opened fresh falls back to its referrer.
     const before = params.get("from") ? null : (lastPage() ?? (document.referrer.startsWith(location.origin) ? document.referrer : null));
-    const from = before ? new URL(before, location.origin).href : null;
+    const from = before ? new URL(siteHref(before), location.origin).href : null;
     // What was just typed comes before an older draft; the email kept with that draft stays. It is taken once:
     // from here it is this page's draft, and a reload brings back what the reader has written since.
     const carried = carriedText(navigation);
@@ -175,7 +176,7 @@ export default function FeedbackPage() {
       form.set("email", draft.email);
       form.set("pageUrl", draft.pageUrl);
       if (shot) form.set("screenshot", shot.file);
-      const res = await fetch("/api/site/feedback", { method: "POST", body: form });
+      const res = await fetch(siteHref("/api/site/feedback"), { method: "POST", body: form });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) return setState({ kind: "error", message: body.detail ?? "提交失败，请稍后再试。" });
       writeDraft(null);

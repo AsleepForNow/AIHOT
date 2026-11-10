@@ -11,6 +11,7 @@ import path from "node:path";
 import sharp from "sharp";
 import { z } from "zod";
 import { beijingStamp } from "@aihot/contracts/time";
+import { withoutSiteBase } from "@aihot/contracts/site-path";
 import { MODULES } from "@aihot/site/modules";
 import { config, credential } from "../config.ts";
 import { sql, type Db } from "../db.ts";
@@ -229,7 +230,8 @@ source_page 是站内功能页的路径，空值表示没有这类来源信息�
 /** The path on this site a report was sent from, without its query; null for anywhere else. */
 function sitePath(pageUrl: string | null): string | null {
   const page = pageUrl ? URL.parse(pageUrl, config.siteUrl) : null;
-  return page?.origin === config.siteUrl ? page.pathname.replace(/\/+$/, "") : null;
+  if (page?.origin !== new URL(config.siteUrl).origin) return null;
+  return withoutSiteBase(config.siteBasePath, page.pathname)?.replace(/\/+$/, "") ?? null;
 }
 
 /** Only the words, whether a picture came with them, and a known feature page's path without its query. */

@@ -3,7 +3,10 @@
 name: aihot
 
 x-app: &app
-  build: .
+  build:
+    context: .
+    args:
+      SITE_URL: ${SITE_URL:-http://localhost:3000}
   image: aihot-app
   restart: unless-stopped
 

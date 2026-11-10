@@ -1,5 +1,6 @@
 // Moving between reports: the archive column on wide desktops; on phones the kind switch in the bar
 // (ReportLayout) and recent-issue chips under it, which narrower desktops show above the paper.
+import { siteHref } from "../../lib/site-path";
 import { IntentLink } from "../../components/ui/IntentLink";
 import { useEffect, useState } from "react";
 import { REPORT_NAMES, type ReportNavigationEntry, type ReportNavigationResponse, type ReportKind } from "@aihot/contracts/site";
@@ -58,7 +59,7 @@ function ArchiveGroup({ g, kind, current, initiallyOpen }: {
   useEffect(() => {
     if (!open || loaded || kind !== "daily" || !g.entries.some((e) => e.title === undefined)) return;
     const controller = new AbortController();
-    fetch(`/api/site/reports/daily/months/${g.id}`, { signal: controller.signal })
+    fetch(siteHref(`/api/site/reports/daily/months/${g.id}`), { signal: controller.signal })
       .then((r) => r.ok ? r.json() : null)
       .then((data: ReportNavigationResponse | null) => { if (data && !controller.signal.aborted) setLoaded(data.items); })
       .catch(() => {});
@@ -95,7 +96,7 @@ function ArchiveGroup({ g, kind, current, initiallyOpen }: {
           );
         })}
       </ul>}
-      {kind === "daily" && !open && <noscript><a href="/daily/archive">查看完整日报归档</a></noscript>}
+      {kind === "daily" && !open && <noscript><a href={siteHref("/daily/archive")}>查看完整日报归档</a></noscript>}
     </details>
   );
 }

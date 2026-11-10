@@ -1,9 +1,9 @@
 User-agent: *
-Allow: /api/v1/
-Allow: /api/mcp
-Disallow: /api/
-Disallow: /admin/
-Disallow: /starred
-Disallow: /feedback
+Allow: {{sitePath}}/api/v1/
+Allow: {{sitePath}}/api/mcp
+Disallow: {{sitePath}}/api/
+Disallow: {{sitePath}}/admin/
+Disallow: {{sitePath}}/starred
+Disallow: {{sitePath}}/feedback
 
 Sitemap: {{siteUrl}}/sitemap.xml

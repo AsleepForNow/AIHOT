@@ -1,5 +1,6 @@
 // Client-side admin commands: same-origin fetch to /api/admin/* with the session's CSRF token, a
 // stable Idempotency-Key per submitted command, and a revalidation of the page's loaders on success.
+import { siteHref, siteRoute } from "../../lib/site-path";
 import { useCallback, useRef, useState } from "react";
 import { useRevalidator, useRouteLoaderData } from "react-router";
 import type { AdminMe } from "@aihot/contracts/admin";
@@ -35,7 +36,7 @@ export function useAdminAction() {
       keys.current.set(label, key);
       setPending(label);
       try {
-        const res = await fetch(path, {
+        const res = await fetch(siteHref(path), {
           method,
           credentials: "same-origin",
           // A JSON content type with no body is refused, so commands without a body send neither.
@@ -43,7 +44,7 @@ export function useAdminAction() {
           body: body === undefined ? undefined : JSON.stringify(body),
         });
         if (res.status === 401) {
-          window.location.href = `/api/auth/login?return=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+          window.location.href = siteHref(`/api/auth/login?return=${encodeURIComponent(siteRoute(window.location.pathname) + window.location.search)}`);
           return null;
         }
         const text = await res.text();

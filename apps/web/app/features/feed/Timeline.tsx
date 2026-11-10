@@ -2,6 +2,7 @@
 // Keeps its place across back navigation and loads further pages. There is no "new items" prompt:
 // readers refresh for the latest head — on phones also by tapping the tab again. The paged lists
 // (DayList) share its day header and slot.
+import { siteHref } from "../../lib/site-path";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigation } from "react-router";
 import { Collapse } from "../../components/ui/Presence";
@@ -155,7 +156,7 @@ export function Timeline({ initial, filters }: { initial: TimelineResponse; filt
   // Filters (i.e. the loader data) changed. A page still loading for the old filters is cancelled, and a
   // response that arrives anyway is dropped (it belongs to another list and cursor). Back or forward to a
   // filter already visited restores what that history entry had loaded and folded; a new one starts over.
-  const filterKey = listPath("/api/site/timeline", filterParams(filters));
+  const filterKey = listPath(siteHref("/api/site/timeline"), filterParams(filters));
   const lastFilterKey = useRef(filterKey);
   const pageRequest = useRef<AbortController | null>(null);
   useEffect(() => () => pageRequest.current?.abort(), []);
@@ -217,14 +218,14 @@ export function Timeline({ initial, filters }: { initial: TimelineResponse; filt
   const loadMore = useCallback(async () => {
     const s = stateRef.current;
     if (!s.nextCursor || pageRequest.current) return;
-    const key = listPath("/api/site/timeline", filterParams(filters));
+    const key = listPath(siteHref("/api/site/timeline"), filterParams(filters));
     const controller = new AbortController();
     pageRequest.current = controller;
     const current = () => lastFilterKey.current === key && !controller.signal.aborted;
     setLoadingMore(true);
     setLoadError(false);
     try {
-      const res = await fetch(listPath("/api/site/timeline", { ...filterParams(filters), cursor: s.nextCursor }), { signal: controller.signal });
+      const res = await fetch(listPath(siteHref("/api/site/timeline"), { ...filterParams(filters), cursor: s.nextCursor }), { signal: controller.signal });
       if (res.status === 400) {
         // Cursor no longer fits: start over from the head.
         const head = await fetch(key, { signal: controller.signal });

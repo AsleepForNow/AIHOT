@@ -1,4 +1,5 @@
 // Duplicate reports of one news fact. Desktop expands inline; phones use a sheet.
+import { siteHref } from "../../lib/site-path";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router";
 import { Collapse } from "../../components/ui/Presence";
@@ -13,7 +14,7 @@ import { listPath, filterParams } from "../../lib/seo";
 import { sessionCache } from "../../lib/session-cache";
 
 const reportsUrl = (factId: string, filters: TimelineFilters | undefined) =>
-  listPath(`/api/site/groups/${encodeURIComponent(factId)}/reports`, filters ? filterParams(filters) : {});
+  listPath(siteHref(`/api/site/groups/${encodeURIComponent(factId)}/reports`), filters ? filterParams(filters) : {});
 
 const labelOf = (group: GroupInfo) => (group.additionalSourceCount > 0 ? `另外 ${group.additionalSourceCount} 家也报道了` : `${group.reportCount} 篇报道`);
 

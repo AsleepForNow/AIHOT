@@ -4,18 +4,20 @@ import { beijingDate, beijingWeekday, isoWeekLabel, isoWeekRange, monthDay as en
 import { EDITION_WHEN, REPORTS, SITE, subjectAfter } from "@aihot/site";
 import { RELEASE } from "@aihot/industry/taxonomy";
 import { monthDay, weekdayShort } from "../../lib/format.ts";
+import { siteHref, siteRoute } from "../../lib/site-path.ts";
 
 export const KINDS: ReportKind[] = ["daily", "weekly", "monthly"];
 export const KIND_PATH: Record<ReportKind, string> = { daily: "/daily", weekly: "/weekly", monthly: "/monthly" };
 
 export function kindFromPath(pathname: string): ReportKind {
-  if (pathname.startsWith("/weekly")) return "weekly";
-  if (pathname.startsWith("/monthly")) return "monthly";
+  const route = siteRoute(pathname);
+  if (route.startsWith("/weekly")) return "weekly";
+  if (route.startsWith("/monthly")) return "monthly";
   return "daily";
 }
 
 /** The kind's RSS feed, announced in the page head so a reader given the page finds it. */
-export const feedLink = (kind: ReportKind) => ({ tagName: "link", rel: "alternate", type: "application/rss+xml", title: `${SITE.name} ${REPORT_NAMES[kind]}`, href: `/feed/${kind}.xml` }) as const;
+export const feedLink = (kind: ReportKind) => ({ tagName: "link", rel: "alternate", type: "application/rss+xml", title: `${SITE.name} ${REPORT_NAMES[kind]}`, href: siteHref(`/feed/${kind}.xml`) }) as const;
 
 export function reportPath(kind: ReportKind, key: string): string {
   return `${KIND_PATH[kind]}/${key}`;

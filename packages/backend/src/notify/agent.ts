@@ -1,8 +1,9 @@
 // Publish durable, source-owned events to the shared hub. Its documented idempotency contract makes
 // uncertain HTTP results safe to retry with the same ID. Execution/claim/retry state belongs to the hub.
 import { createHash } from "node:crypto";
-import { credential, config } from "../config.ts";
+import { credential } from "../config.ts";
 import { sql } from "../db.ts";
+import { siteUrl } from "../publication/links.ts";
 import { feishuInternalEnabled, type Finding } from "./feishu.ts";
 
 interface Event { id: string; type: string; subject: string; summary: string; detail: string; link: string }
@@ -73,12 +74,12 @@ export async function wakeAgent(f: Finding, now = Date.now()): Promise<boolean> 
     id: identity.length <= 200 ? identity : `alert:${hash(identity)}`,
     type: f.agentOnly ? f.agentType ?? "alert.review" : f.level === "today" ? "alert.today" : "alert.now",
     subject: subject(f.key), summary: clip(f.title,200), detail: clip([f.impact,f.detail].filter(Boolean).join("\n"),4000),
-    link: new URL("/admin/runs",config.siteUrl).href,
+    link: siteUrl("/admin/runs"),
   }, now);
 }
 
 /** Called after the daily follow-up message was generated. No model or separate scheduler here. */
 /** Whether the hub took the day's list. */
 export async function wakeDigest(date: string, count: number): Promise<boolean> {
-  return publish({id:`digest:${date}`,type:"alert.digest",subject:`digest:${date}`,summary:`系统日报 ${date}`,detail:`${count} 项待跟进`,link:new URL("/admin/runs",config.siteUrl).href});
+  return publish({id:`digest:${date}`,type:"alert.digest",subject:`digest:${date}`,summary:`系统日报 ${date}`,detail:`${count} 项待跟进`,link:siteUrl("/admin/runs")});
 }

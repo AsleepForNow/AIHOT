@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link, PrefetchPageLinks, UNSAFE_DataRouterContext, UNSAFE_FrameworkContext, useHref, useLocation, type LinkProps } from "react-router";
 import { hasFreshPage } from '../../lib/page-reuse';
+import { siteRoute } from "../../lib/site-path";
 
 /**
  * Prefetches when the reader presses the link: a mouse or pen button going down, or a touch held
@@ -20,7 +21,7 @@ export function IntentLink({ onPointerDown, onTouchStart, onTouchMove, onTouchEn
   // Router prefetch loads chunks but opts clientLoader routes out of data prefetch. Their
   // serverLoader still reads this same single-fetch URL; prefetch it with the same browser TTL.
   const target = new URL(href, 'http://page.local');
-  const differentPage = target.pathname + target.search !== location.pathname + location.search;
+  const differentPage = siteRoute(target.pathname) + target.search !== location.pathname + location.search;
   // Router prefetch also asks shouldRevalidate. A selected/remembered page needs neither its
   // assets nor that revalidation decision, which is reserved for an actual refresh. The prefetch is
   // mounted here rather than through Link's prop: Link keeps prefetching after the prop is switched

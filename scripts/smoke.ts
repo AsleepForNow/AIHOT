@@ -2,9 +2,11 @@
 // deploy, and CI's check of the built site on an empty database.
 //   node scripts/smoke.ts [--base http://localhost:3000]
 import { SITE } from "@aihot/site";
+import { siteBasePath, withoutSiteBase } from "@aihot/contracts/site-path";
 
 const at = process.argv.indexOf("--base");
-const base = (at > 0 ? process.argv[at + 1] : process.env.SITE_URL) ?? "http://localhost:3000";
+const base = ((at > 0 ? process.argv[at + 1] : process.env.SITE_URL) ?? "http://localhost:3000").replace(/\/+$/, "");
+const mount = siteBasePath(base);
 
 const PAGES = ["/", "/all", "/hot", "/daily", "/daily/archive", "/topics", "/starred", "/agent", "/about", "/changelog", "/feedback", "/terms", "/privacy", "/more", "/admin/login"];
 const MACHINE: Array<[path: string, type: RegExp]> = [
@@ -40,7 +42,24 @@ async function check(path: string, expect: (res: Response, body: string) => stri
 
 // Pages write the name as HTML text: a name such as "MyF&B" appears as "MyF&amp;B".
 const htmlName = SITE.name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
-for (const path of PAGES) await check(path, (_res, body) => (body.includes(SITE.name) || body.includes(htmlName) ? null : `the page does not name ${SITE.name}`));
+const browserAssets = new Map<string, string>();
+for (const path of PAGES) await check(path, (_res, body) => {
+  if (!body.includes(SITE.name) && !body.includes(htmlName)) return `the page does not name ${SITE.name}`;
+  if (!mount) return null;
+  for (const [, href] of body.matchAll(/<(?:a|form|img|link|script)\b[^>]*?\s(?:href|src|action)="(\/(?!\/)[^"]*)"/g)) {
+    const route = withoutSiteBase(mount, href!);
+    if (route === null) return `URL outside ${mount}: ${href}`;
+    if (path === "/" && route.startsWith("/assets/")) browserAssets.set(route.split(".").at(-1)!, route);
+  }
+  return null;
+});
+if (mount) {
+  for (const [extension, type] of [["css", /text\/css/], ["js", /javascript/]] as const) {
+    const asset = browserAssets.get(extension);
+    if (asset) await check(asset, (res) => type.test(res.headers.get("content-type") ?? "") ? null : "unexpected asset type");
+    else { console.log(`✗ no ${extension} asset found on the homepage`); failed += 1; }
+  }
+}
 for (const [path, type] of MACHINE) await check(path, (res) => (type.test(res.headers.get("content-type") ?? "") ? null : `content-type ${res.headers.get("content-type")}`));
 // MCP: the handshake answers with the site's server name.
 const mcp = await fetch(`${base}/api/mcp`, {

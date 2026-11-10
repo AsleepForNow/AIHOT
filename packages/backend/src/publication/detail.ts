@@ -2,6 +2,7 @@
 import type { OutlineEntry, SiteItemDetail, StoryRef } from "@aihot/contracts/site";
 import { ITEM_COPY, SITE } from "@aihot/site";
 import { bodyToMarkdown } from "../content/markdown.ts";
+import { config } from "../config.ts";
 import { withCover, type Cover } from "../content/cover.ts";
 import { sql } from "../db.ts";
 import { isChineseText, stripTagMarkup } from "../lib/text.ts";
@@ -10,7 +11,7 @@ import { textToHtml } from "../content/sanitize.ts";
 import { xArticleBody } from "../content/posts.ts";
 import { eventPageCondition, exportTranslation, isChineseBody, ITEM_COLUMNS, ITEM_FROM, seatHolders, showsPost, thinPageCondition, toItemSummary, xView, type ItemRow } from "./items.ts";
 import { evidenceCondition, listedCondition } from "./scope.ts";
-import { itemUrl, siteUrl } from "./links.ts";
+import { itemUrl } from "./links.ts";
 import { hasItemPage, publicSourceName } from "./rules.ts";
 import { tagTopics, topicLinks, topicMembership } from "./topics.ts";
 import { firstDaily } from "./reports.ts";
@@ -242,7 +243,7 @@ export async function exportMarkdown(id: string): Promise<{ filename: string; bo
     } else if (post?.text) lines.push("## 正文", "", post.text, "");
     if (post?.translation) lines.push("## 中文译文", "", post.translation, "");
     for (const media of post?.media ?? []) {
-      const url = media.url.startsWith("/") ? siteUrl(media.url) : media.url;
+      const url = media.url.startsWith("/") ? new URL(media.url, config.siteUrl).href : media.url;
       lines.push(media.kind === "image" ? `![${media.alt ?? ""}](${url})` : `[视频](${url})`, "");
     }
     const q = post?.quoted;

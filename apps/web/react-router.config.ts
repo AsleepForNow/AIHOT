@@ -1,7 +1,9 @@
 import type { Config } from "@react-router/dev/config";
+import { siteBasePath } from "@aihot/contracts/site-path";
 
 export default {
   ssr: true,
+  basename: siteBasePath(process.env.SITE_URL) + "/",
   appDirectory: "app",
   buildDirectory: "build",
   // The whole route manifest ships with the page: no /__manifest?paths=… requests, whose answers are

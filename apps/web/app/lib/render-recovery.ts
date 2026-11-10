@@ -1,4 +1,5 @@
 // A public render error can outlive its deployment: replace an outdated document once per tab.
+import { siteHref } from "./site-path.ts";
 import { isRouteErrorResponse } from "react-router";
 import type { HydrationOptions } from "react-dom/client";
 
@@ -16,7 +17,7 @@ export function createRenderErrorHandler(documentRelease: string | null) {
       // If storage is blocked, manual reload stays available without risking a reload loop.
       const storage = window.sessionStorage;
       if (storage.getItem(RECOVERY_RELEASE_KEY) === documentRelease) return;
-      const response = await fetch("/api/health", { cache: "no-store", signal: AbortSignal.timeout(5_000) });
+      const response = await fetch(siteHref("/api/health"), { cache: "no-store", signal: AbortSignal.timeout(5_000) });
       if (!response.ok) return;
       const health = await response.json() as { ok?: unknown; release?: unknown };
       if (health.ok !== true || typeof health.release !== "string" || !health.release

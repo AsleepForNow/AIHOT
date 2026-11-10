@@ -39,6 +39,7 @@ function fillPlaceholders(text: string, json: boolean): string {
   const values: Record<string, string> = {
     siteName: SITE.name,
     siteUrl: config.siteUrl,
+    sitePath: config.siteBasePath,
     description: SITE.description,
     tagline: SITE.tagline,
     locale: SITE.locale,

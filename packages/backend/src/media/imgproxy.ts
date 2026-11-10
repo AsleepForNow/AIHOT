@@ -52,7 +52,7 @@ export function proxiedImage(url: string | null | undefined, mode: ProxyMode, ab
 
 function signedMediaUrl(url: string, mode: string, exp: number, absolute: boolean): string {
   const path = `/api/img-proxy?u=${encodeURIComponent(url)}&mode=${mode}&exp=${exp}&sig=${signature(url, mode, exp).slice(0, SIG_HEX)}`;
-  return absolute ? `${config.siteUrl}${path}` : path;
+  return `${absolute ? config.siteUrl : config.siteBasePath}${path}`;
 }
 
 /** Browser source candidates, each independently signed with the same expiry boundary. */

@@ -1,3 +1,4 @@
+import { siteHref } from "../../lib/site-path";
 import { Link } from "react-router";
 import type { StoryFollowup, StoryFollowupsResponse, StoryRef } from "@aihot/contracts/site";
 import { MoreLink } from "../../components/ui/Page";
@@ -8,7 +9,7 @@ export function StoryFollowups({ followups, story, currentId }: { followups: Sto
   const items = followups?.items.filter((d) => d.representative.id !== currentId) ?? [];
   return items.length > 0
     ? <Followups items={items} more={followups!.more} story={story} />
-    : <noscript><a href={`/story/${story.publicId}`}>查看事件全部后续</a></noscript>;
+    : <noscript><a href={siteHref(`/story/${story.publicId}`)}>查看事件全部后续</a></noscript>;
 }
 
 function Followups({items, more, story}: {items: StoryFollowup[]; more: boolean; story: StoryRef}) {

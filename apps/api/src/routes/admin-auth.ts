@@ -2,6 +2,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { ZodError } from "zod";
 import { safeReturn, SIGN_IN_HOME, type AdminMe } from "@aihot/contracts/admin";
+import { withSiteBase } from "@aihot/contracts/site-path";
 import { SITE } from "@aihot/site";
 import { config } from "@aihot/backend/config";
 import {
@@ -142,7 +143,7 @@ export function registerAdminAuth(app: FastifyInstance) {
     } catch (error) {
       const message = error instanceof LoginRejected ? error.message : "登录失败，请稍后再试";
       if (!(error instanceof LoginRejected)) req.log.error({ err: error }, "admin login failed");
-      return reply.code(403).type("text/html; charset=utf-8").send(`<!doctype html><meta charset="utf-8"><title>登录失败 · ${SITE.name}</title><p style="font:16px system-ui;padding:40px">${message}。<a href="/api/auth/login">重新登录</a></p>`);
+      return reply.code(403).type("text/html; charset=utf-8").send(`<!doctype html><meta charset="utf-8"><title>登录失败 · ${SITE.name}</title><p style="font:16px system-ui;padding:40px">${message}。<a href="${withSiteBase(config.siteBasePath, "/api/auth/login")}">重新登录</a></p>`);
     }
   });
 

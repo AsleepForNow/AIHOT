@@ -9,6 +9,7 @@ import { pathToFileURL } from "node:url";
 import { createRequestListener } from "@react-router/node";
 import type { ServerBuild } from "react-router";
 import { isApiOwned, resolveRedirect } from "@aihot/contracts/http-policy";
+import { siteBasePath, withSiteBase, withoutSiteBase } from "@aihot/contracts/site-path";
 import { BROWSER_MAX_SECONDS } from "./app/lib/api.server.ts";
 import { proxyToApi } from "./app/lib/api-proxy.server.ts";
 import { logError } from "./app/lib/errors.server.ts";
@@ -39,6 +40,10 @@ const TYPES: Record<string, string> = {
 
 // A file URL, not a path: on Windows import() reads "C:\..." as a URL with the scheme "c:".
 const build: ServerBuild = await import(pathToFileURL(path.resolve(import.meta.dirname, "build/server/index.js")).href);
+const BASE = (build.basename ?? "/").replace(/\/+$/, "");
+if (BASE !== siteBasePath(process.env.SITE_URL)) {
+  throw new Error("The site's mount path changed. Rebuild the web app with the deployment's SITE_URL.");
+}
 // Keep an empty result for pages without a loader. A tab opened before a page lost its loader still asks
 // for that result, and its router rejects a missing one before React's release recovery can run; an empty
 // one reaches the component instead. The client manifest declares no loader, so current documents make no
@@ -94,8 +99,8 @@ function pageResponse(req: import("node:http").IncomingMessage, res: import("nod
   const target = req.url ?? "/";
   // An origin-form target is a path even when it starts with //, not a new URL authority.
   const url = new URL(target.startsWith("/") ? `http://web.local${target}` : target, "http://web.local");
-  const pathname = decodeURIComponent(url.pathname).replace(/\.data$/, "");
-  const publicRead = (req.method === "GET" || req.method === "HEAD") && !/^\/admin(?:\/|$)/i.test(pathname);
+  const pathname = withoutSiteBase(BASE, decodeURIComponent(url.pathname).replace(/\.data$/, ""));
+  const publicRead = (req.method === "GET" || req.method === "HEAD") && pathname !== null && !/^\/admin(?:\/|$)/i.test(pathname);
   if (publicRead && url.pathname.endsWith(".data")) {
     url.searchParams.delete("_routes");
     req.url = url.pathname + url.search;
@@ -140,13 +145,22 @@ function pageResponse(req: import("node:http").IncomingMessage, res: import("nod
 async function handle(req: import("node:http").IncomingMessage, res: import("node:http").ServerResponse) {
   const raw = req.url ?? "/";
   const qi = raw.indexOf("?");
-  const pathname = qi >= 0 ? raw.slice(0, qi) : raw;
+  const externalPath = qi >= 0 ? raw.slice(0, qi) : raw;
+  const pathname = withoutSiteBase(BASE, externalPath);
   const search = qi >= 0 ? raw.slice(qi) : "";
+  if (pathname === null) {
+    res.writeHead(404, { "Cache-Control": "no-store" });
+    return res.end("Not found");
+  }
+  if (BASE && externalPath === BASE) {
+    res.writeHead(308, { Location: BASE + "/" + search, "Cache-Control": "private, no-store" });
+    return res.end();
+  }
 
   const decision = resolveRedirect(pathname, search);
   if (decision) {
     for (const [k, v] of Object.entries(decision.headers)) res.setHeader(k, v);
-    if (decision.location) res.setHeader("Location", decision.location);
+    if (decision.location) res.setHeader("Location", withSiteBase(BASE, decision.location));
     res.statusCode = decision.status;
     return res.end(decision.location ? undefined : decision.status === 410 ? "Gone" : "Not found");
   }
@@ -156,7 +170,7 @@ async function handle(req: import("node:http").IncomingMessage, res: import("nod
     // entry), or this connection's own. Both headers carry only that.
     const forwarded = String(req.headers["x-forwarded-for"] ?? "").split(",").map((v) => v.trim()).filter(Boolean);
     const client = TRUST_PROXY && forwarded.length ? forwarded[forwarded.length - 1]! : (req.socket.remoteAddress ?? "");
-    return proxyToApi(req, res, { "x-forwarded-for": client, "x-real-ip": client });
+    return proxyToApi(req, res, pathname + search, BASE, { "x-forwarded-for": client, "x-real-ip": client });
   }
 
   if ((req.method === "GET" || req.method === "HEAD") && pathname.includes(".") && (await serveStatic(pathname, res))) return;
@@ -174,7 +188,7 @@ server.listen(PORT, HOST, () => {
   // An ephemeral local site learns its canonical origin only after the listener owns the port.
   if (process.env.SITE_URL) {
     const site = new URL(process.env.SITE_URL);
-    if (site.port === "0") { site.port = String(port); process.env.SITE_URL = site.origin; }
+    if (site.port === "0") { site.port = String(port); process.env.SITE_URL = site.origin + site.pathname.replace(/\/+$/, ""); }
   }
   console.log(JSON.stringify({ level: "info", msg: "web started", port, pid: process.pid }));
 });

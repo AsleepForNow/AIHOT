@@ -5,13 +5,14 @@ import type { MetaDescriptor } from "react-router";
 import { REPORT_NAMES, reportDateLabel, type ReportDetail, type StoryDetail, type TimelineFilters } from "@aihot/contracts/site";
 import { isCategoryKey, isChannelKey } from "@aihot/contracts/taxonomy";
 import { SITE, subjectAfter, withSubject } from "@aihot/site";
+import { siteHref, webBasePath } from "./site-path.ts";
 
 /**
  * The site's address: SITE_URL while rendering on the server (what crawlers and share previews read),
- * the page's own origin in the browser.
+ * the browser's origin and the built mount path on the client.
  */
 export function siteUrl(): string {
-  if (typeof window !== "undefined") return window.location.origin;
+  if (typeof window !== "undefined") return window.location.origin + webBasePath;
   return (process.env.SITE_URL || SITE.defaultUrl).replace(/\/+$/, "");
 }
 
@@ -226,7 +227,7 @@ export function articleLd(input: { path: string; headline: string; description?:
     inLanguage: SITE.locale,
     ...(input.publishedAt ? { datePublished: input.publishedAt } : {}),
     ...(input.modifiedAt ? { dateModified: input.modifiedAt } : {}),
-    ...(input.image ? { image: new URL(input.image, base).href } : {}),
+    ...(input.image ? { image: new URL(siteHref(input.image), base).href } : {}),
     ...(input.section?.length ? { articleSection: input.section } : {}),
     isAccessibleForFree: true,
     author: siteOrganization(),

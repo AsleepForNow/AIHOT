@@ -1,12 +1,13 @@
 // Share poster: the server-rendered poster (with a QR code to the article), to save or hand to the
 // system share sheet. Loaded on demand from the article page; a bottom sheet on phones, centred above.
+import { siteHref } from "../../lib/site-path";
 import { useEffect, useState } from "react";
 import { SITE } from "@aihot/site";
 import { Sheet } from "../../components/ui/Sheet";
 import { IconDownload, IconShare } from "../../components/icons";
 
 export default function PosterSheet({ id, title, open, onClose }: { id: string; title: string; open: boolean; onClose: () => void }) {
-  const src = `/og/posters/${id}.png`;
+  const src = siteHref(`/og/posters/${id}.png`);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [canShareFile, setCanShareFile] = useState(false);
