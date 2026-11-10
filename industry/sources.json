@@ -2,6 +2,139 @@
   "$comment": "示范信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。之后在后台“信源”里新建、修改和暂停。字段说明见 docs/customize.md。",
   "sources": [
     {
+      "id": "deepseek-api-updates",
+      "name": "DeepSeek API 更新",
+      "kind": "web_list",
+      "config": {
+        "url": "https://api-docs.deepseek.com/updates/",
+        "parseMode": "docusaurus_changelog",
+        "allowUrlPrefixes": ["https://api-docs.deepseek.com/updates/"],
+        "preserveUrlFragment": true,
+        "_aihot": { "initialBackfillLimit": 4 }
+      },
+      "tier": "T1",
+      "owner_entity_id": "deepseek",
+      "interval_minutes": 180,
+      "tags": ["官方"]
+    },
+    {
+      "id": "releases-openai-codex",
+      "name": "OpenAI Codex Releases",
+      "kind": "json_list",
+      "config": {
+        "url": "https://api.github.com/repos/openai/codex/releases?per_page=50",
+        "mode": "json_api",
+        "requireBoolean": { "path": "prerelease", "equals": false },
+        "titlePaths": ["name", "tag_name"],
+        "urlTemplate": "{raw:html_url}",
+        "summaryPaths": ["body"],
+        "summaryIsBody": true,
+        "publishedAtPath": "published_at",
+        "externalIdPath": "id",
+        "_aihot": { "initialBackfillLimit": 4 }
+      },
+      "tier": "T1",
+      "owner_entity_id": "openai",
+      "interval_minutes": 120,
+      "tags": ["官方", "AI 编程"]
+    },
+    {
+      "id": "releases-claude-code",
+      "name": "Anthropic Claude Code Releases",
+      "kind": "json_list",
+      "config": {
+        "url": "https://api.github.com/repos/anthropics/claude-code/releases?per_page=12",
+        "mode": "json_api",
+        "requireBoolean": { "path": "prerelease", "equals": false },
+        "titlePaths": ["name", "tag_name"],
+        "urlTemplate": "{raw:html_url}",
+        "summaryPaths": ["body"],
+        "summaryIsBody": true,
+        "publishedAtPath": "published_at",
+        "externalIdPath": "id",
+        "_aihot": { "initialBackfillLimit": 4 }
+      },
+      "tier": "T1",
+      "owner_entity_id": "anthropic",
+      "interval_minutes": 120,
+      "tags": ["官方", "AI 编程"]
+    },
+    {
+      "id": "rss-cursor-changelog",
+      "name": "Cursor Changelog",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://cursor.com/changelog/rss.xml",
+        "_aihot": { "initialBackfillLimit": 4 }
+      },
+      "tier": "T1",
+      "owner_entity_id": "cursor",
+      "interval_minutes": 180,
+      "tags": ["官方", "AI 编程"]
+    },
+    {
+      "id": "releases-qwen-code",
+      "name": "Qwen Code Releases",
+      "kind": "json_list",
+      "config": {
+        "url": "https://api.github.com/repos/QwenLM/qwen-code/releases?per_page=20",
+        "mode": "json_api",
+        "requireBoolean": { "path": "prerelease", "equals": false },
+        "titlePaths": ["name", "tag_name"],
+        "urlTemplate": "{raw:html_url}",
+        "summaryPaths": ["body"],
+        "summaryIsBody": true,
+        "publishedAtPath": "published_at",
+        "externalIdPath": "id",
+        "_aihot": { "initialBackfillLimit": 4 }
+      },
+      "tier": "T1",
+      "owner_entity_id": "qwen",
+      "interval_minutes": 180,
+      "tags": ["官方", "AI 编程"]
+    },
+    {
+      "id": "releases-xai-sdk",
+      "name": "xAI Python SDK Releases",
+      "kind": "json_list",
+      "config": {
+        "url": "https://api.github.com/repos/xai-org/xai-sdk-python/releases?per_page=12",
+        "mode": "json_api",
+        "requireBoolean": { "path": "prerelease", "equals": false },
+        "titlePaths": ["name", "tag_name"],
+        "urlTemplate": "{raw:html_url}",
+        "summaryPaths": ["body"],
+        "summaryIsBody": true,
+        "publishedAtPath": "published_at",
+        "externalIdPath": "id",
+        "_aihot": { "initialBackfillLimit": 4 }
+      },
+      "tier": "T1",
+      "owner_entity_id": "xai",
+      "interval_minutes": 180,
+      "tags": ["官方", "开发工具"]
+    },
+    {
+      "id": "releases-vllm",
+      "name": "vLLM Releases",
+      "kind": "json_list",
+      "config": {
+        "url": "https://api.github.com/repos/vllm-project/vllm/releases?per_page=12",
+        "mode": "json_api",
+        "requireBoolean": { "path": "prerelease", "equals": false },
+        "titlePaths": ["name", "tag_name"],
+        "urlTemplate": "{raw:html_url}",
+        "summaryPaths": ["body"],
+        "summaryIsBody": true,
+        "publishedAtPath": "published_at",
+        "externalIdPath": "id",
+        "_aihot": { "initialBackfillLimit": 4 }
+      },
+      "tier": "T1",
+      "interval_minutes": 180,
+      "tags": ["官方", "开源"]
+    },
+    {
       "id": "rss-openai-news",
       "name": "OpenAI News",
       "kind": "rss",
