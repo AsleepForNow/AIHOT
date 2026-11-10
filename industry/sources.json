@@ -20,18 +20,13 @@
     {
       "id": "releases-openai-codex",
       "name": "OpenAI Codex Releases",
-      "kind": "json_list",
+      "kind": "web_list",
       "config": {
-        "url": "https://api.github.com/repos/openai/codex/releases?per_page=50",
-        "mode": "json_api",
-        "requireBoolean": { "path": "prerelease", "equals": false },
-        "titlePaths": ["name", "tag_name"],
-        "urlTemplate": "{raw:html_url}",
-        "summaryPaths": ["body"],
-        "summaryIsBody": true,
-        "publishedAtPath": "published_at",
-        "externalIdPath": "id",
-        "_aihot": { "initialBackfillLimit": 4 }
+        "url": "https://github.com/openai/codex/releases/latest",
+        "itemSelector": "#repo-content-pjax-container",
+        "linkSelector": "a[aria-current='page'][href^='/openai/codex/releases/tag/']",
+        "publishedAtSelector": "relative-time[datetime]",
+        "allowUrlPrefixes": ["https://github.com/openai/codex/releases/tag/"]
       },
       "tier": "T1",
       "owner_entity_id": "openai",
